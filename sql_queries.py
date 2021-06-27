@@ -8,11 +8,14 @@ time_table_drop = "DROP TABLE IF EXISTS time"
 
 # CREATE TABLES
 
-songplay_table_create = ("CREATE TABLE IF NOT EXISTS songplays  \
-    (songplay_id int, start_time timestamp, \
-    user_id varchar, level varchar, song_id int, artist_id int, \
-    session_id int, location varchar, user_agent varchar) \
-")
+songplay_table_create = ("""
+CREATE TABLE IF NOT EXISTS songplays (
+    songplay_id int, start_time timestamp,
+    user_id varchar, level varchar, song_id int, artist_id int,
+    session_id int, location varchar, user_agent varchar
+""")
+
+#     PRIMART KEY (songplay_id))
 
 user_table_create = ("CREATE TABLE IF NOT EXISTS users  \
     (user_id varchar, first_name varchar, last_name varchar, \
@@ -61,7 +64,11 @@ time_table_insert = ("INSERT INTO time (start_time, hour, day, week, month, year
 # FIND SONGS
 
 song_select = ("""
-SELECT * FROM songs
+SELECT songs.song_id as song_id, artists.artist_id as artist_id FROM songs
+JOIN artists ON songs.artist_id = artists.artist_id
+WHERE title = %s
+AND artists.name = %s
+AND duration = %s
 """)
 
 # QUERY LISTS
