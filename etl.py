@@ -1,3 +1,4 @@
+import io
 import os
 import glob
 import psycopg2
@@ -78,6 +79,8 @@ def process_log_file(cur, filepath):
     for i, row in user_df.iterrows():
         cur.execute(user_table_insert, row)
 
+    songplay_csv = io.StringIO()
+
     # insert songplay records
     for index, row in df.iterrows():
 
@@ -88,14 +91,33 @@ def process_log_file(cur, filepath):
         if results:
             songid, artistid = results
         else:
-            songid, artistid = None, None
+            songid, artistid = 'None', 'None'
 
         # insert songplay record
         t = pd.to_datetime(row.ts, origin="unix", unit="ms")
 
-        songplay_data = (t, row.userId, row.level, songid,
-                         artistid, row.sessionId, row.location, row.userAgent)
-        cur.execute(songplay_table_insert, songplay_data)
+        songplay_data = (t.isoformat(), str(row.userId), row.level, songid,
+                         artistid, str(row.sessionId), str(row.location), row.userAgent)
+
+        # convert csv data.
+        songplay_csv.write('|'.join(songplay_data) + '\n')
+
+    # COPY songplays record.
+    songplay_csv.seek(0)
+    cur.copy_from(
+        songplay_csv,
+        'songplays',
+        sep='|',
+        null='None',
+        columns=('start_time',
+                 'user_id',
+                 'level',
+                 'song_id',
+                 'artist_id',
+                 'session_id',
+                 'location',
+                 'user_agent')
+    )
 
 
 def process_data(cur, conn, filepath, func):
