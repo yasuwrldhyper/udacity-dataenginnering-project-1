@@ -42,7 +42,7 @@ The following is an example of SQL for analysis.
 Execute the following SQL to find out how many times a user has played a song in a month.
 
 ```sql
-%sql SELECT user_id, month, year, count(*) FROM songplays \
+%sql SELECT user_id, month, year, count(*) as song_play_count FROM songplays \
 JOIN time ON songplays.start_time = time.start_time \
-GROUP BY user_id, month, year;
+GROUP BY user_id, month, year LIMIT 5;
 ```
